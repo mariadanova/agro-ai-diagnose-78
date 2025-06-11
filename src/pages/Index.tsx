@@ -1,88 +1,49 @@
+
 import React, { useState } from 'react';
 import { Camera, Upload, FileText, History, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageUpload from '@/components/ImageUpload';
-import CropIdentificationLoading from '@/components/CropIdentificationLoading';
+import CropSelector from '@/components/CropSelector';
 import DiagnosisResult from '@/components/DiagnosisResult';
 import DiagnosisHistory from '@/components/DiagnosisHistory';
-import { useCropIdentification } from '@/hooks/useCropIdentification';
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState('upload'); // upload, identifying, diagnosis, history
+  const [currentStep, setCurrentStep] = useState('upload'); // upload, selecting, diagnosis, history
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCrop, setSelectedCrop] = useState<string>('');
   const [diagnosisData, setDiagnosisData] = useState(null);
-  const [identificationProgress, setIdentificationProgress] = useState(0);
 
-  const { identifyCrop, isLoading: isIdentifying, error: identificationError } = useCropIdentification();
-
-  const handleImageSelected = async (imageUrl: string) => {
+  const handleImageSelected = (imageUrl: string) => {
     setSelectedImage(imageUrl);
-    setCurrentStep('identifying');
-    setIdentificationProgress(0);
+    setCurrentStep('selecting');
+  };
 
-    // Simular progresso
-    const progressInterval = setInterval(() => {
-      setIdentificationProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(progressInterval);
-          return 95;
-        }
-        return prev + Math.random() * 15;
-      });
-    }, 500);
+  const handleCropSelected = () => {
+    // Simular chamada para API de diagnóstico
+    setTimeout(() => {
+      const mockDiagnosis = {
+        plantName: getCropName(selectedCrop),
+        disease: getRandomDisease(selectedCrop),
+        severity: Math.floor(Math.random() * 100),
+        confidence: 85 + Math.floor(Math.random() * 15),
+        recommendations: getRecommendations(selectedCrop),
+        image: selectedImage
+      };
+      setDiagnosisData(mockDiagnosis);
+      setCurrentStep('diagnosis');
+    }, 1500);
+  };
 
-    try {
-      // Identificar cultura automaticamente
-      const result = await identifyCrop(imageUrl);
-      
-      clearInterval(progressInterval);
-      setIdentificationProgress(100);
-      
-      console.log('Cultura identificada:', result);
-      setSelectedCrop(result.cropId);
-      
-      // Pequeno delay para mostrar 100% antes de prosseguir
-      setTimeout(() => {
-        // Simular chamada para API de diagnóstico
-        setTimeout(() => {
-          const mockDiagnosis = {
-            plantName: result.cropName,
-            disease: getRandomDisease(result.cropId),
-            severity: Math.floor(Math.random() * 100),
-            confidence: 85 + Math.floor(Math.random() * 15),
-            recommendations: getRecommendations(result.cropId),
-            image: selectedImage,
-            identificationConfidence: Math.round(result.confidence * 100)
-          };
-          setDiagnosisData(mockDiagnosis);
-          setCurrentStep('diagnosis');
-        }, 1500);
-      }, 1000);
-
-    } catch (error) {
-      console.error('Erro na identificação:', error);
-      clearInterval(progressInterval);
-      
-      // Em caso de erro, usar identificação padrão
-      setSelectedCrop('alface');
-      setIdentificationProgress(100);
-      
-      setTimeout(() => {
-        const mockDiagnosis = {
-          plantName: 'Alface',
-          disease: getRandomDisease('alface'),
-          severity: Math.floor(Math.random() * 100),
-          confidence: 85 + Math.floor(Math.random() * 15),
-          recommendations: getRecommendations('alface'),
-          image: selectedImage,
-          identificationConfidence: 30
-        };
-        setDiagnosisData(mockDiagnosis);
-        setCurrentStep('diagnosis');
-      }, 1000);
-    }
+  const getCropName = (cropId: string) => {
+    const names = {
+      alface: 'Alface',
+      mandioca: 'Mandioca',
+      tomate: 'Tomate',
+      cenoura: 'Cenoura',
+      milho: 'Milho'
+    };
+    return names[cropId as keyof typeof names] || 'Cultura';
   };
 
   const getRandomDisease = (crop: string) => {
@@ -112,7 +73,6 @@ const Index = () => {
     setSelectedImage(null);
     setSelectedCrop('');
     setDiagnosisData(null);
-    setIdentificationProgress(0);
   };
 
   return (
@@ -150,7 +110,7 @@ const Index = () => {
               <CardHeader className="text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-t-lg">
                 <CardTitle className="text-2xl">Diagnosticar Planta</CardTitle>
                 <p className="text-green-100">
-                  Tire uma foto da sua hortaliça - a IA identificará automaticamente o tipo
+                  Tire uma foto da sua hortaliça para análise
                 </p>
               </CardHeader>
               <CardContent className="p-8">
@@ -160,10 +120,12 @@ const Index = () => {
           </div>
         )}
 
-        {currentStep === 'identifying' && (
-          <CropIdentificationLoading
+        {currentStep === 'selecting' && (
+          <CropSelector
             selectedImage={selectedImage}
-            progress={identificationProgress}
+            selectedCrop={selectedCrop}
+            onCropChange={setSelectedCrop}
+            onProceed={handleCropSelected}
           />
         )}
 
