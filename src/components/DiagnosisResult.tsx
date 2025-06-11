@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { FileText, Download, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { FileText, Download, AlertTriangle, CheckCircle, RefreshCw, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,7 @@ interface DiagnosisData {
   confidence: number;
   recommendations: string[];
   image: string;
+  identificationConfidence?: number;
 }
 
 interface DiagnosisResultProps {
@@ -85,6 +85,17 @@ const DiagnosisResult: React.FC<DiagnosisResultProps> = ({ diagnosis, onNewDiagn
               className="w-full h-64 object-cover rounded-lg mb-4"
             />
             <div className="space-y-3">
+              {diagnosis.identificationConfidence && (
+                <div className="flex justify-between items-center">
+                  <span className="font-medium flex items-center space-x-2">
+                    <Brain className="h-4 w-4 text-blue-500" />
+                    <span>Identificação IA:</span>
+                  </span>
+                  <span className="text-lg font-bold text-blue-600">
+                    {diagnosis.identificationConfidence}%
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <span className="font-medium">Confiança do Diagnóstico:</span>
                 <span className="text-lg font-bold text-green-600">{diagnosis.confidence}%</span>
