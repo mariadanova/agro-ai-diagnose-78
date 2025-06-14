@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, Calendar, Leaf, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import jsPDF from 'jspdf';
 
 interface HistoryEntry {
   id: number;
@@ -13,6 +14,7 @@ interface HistoryEntry {
   severity: number;
   confidence: number;
   image: string;
+  recommendations?: string[];
 }
 
 interface DiagnosisHistoryProps {
@@ -50,14 +52,55 @@ const DiagnosisHistory: React.FC<DiagnosisHistoryProps> = ({ onBack }) => {
   };
 
   const downloadPDF = (entry: HistoryEntry) => {
-    // Simular download do PDF
-    const blob = new Blob(['Laudo Técnico - agro.IA'], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `laudo-${entry.plantName}-${entry.id}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const doc = new jsPDF();
+    const analysisDate = new Date(entry.date).toLocaleDateString('pt-BR');
+    
+    // Cabeçalho
+    doc.setFontSize(20);
+    doc.text('LAUDO TÉCNICO - agro.IA', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Data da Análise: ${analysisDate}`, 20, 35);
+    
+    // Linha separadora
+    doc.line(20, 40, 190, 40);
+    
+    // Informações da planta
+    doc.setFontSize(16);
+    doc.text('INFORMAÇÕES DA ANÁLISE', 20, 55);
+    
+    doc.setFontSize(12);
+    doc.text(`Cultura: ${entry.plantName}`, 20, 70);
+    doc.text(`Doença Identificada: ${entry.disease}`, 20, 85);
+    doc.text(`Severidade: ${getSeverityLabel(entry.severity)} (${entry.severity}%)`, 20, 100);
+    doc.text(`Confiança do Diagnóstico: ${entry.confidence}%`, 20, 115);
+    
+    // Recomendações (se disponíveis)
+    if (entry.recommendations && entry.recommendations.length > 0) {
+      doc.setFontSize(16);
+      doc.text('RECOMENDAÇÕES DE MANEJO', 20, 140);
+      
+      doc.setFontSize(12);
+      let yPosition = 155;
+      entry.recommendations.forEach((rec, index) => {
+        const lines = doc.splitTextToSize(`${index + 1}. ${rec}`, 170);
+        doc.text(lines, 20, yPosition);
+        yPosition += lines.length * 7;
+      });
+    }
+    
+    // Disclaimer
+    const disclaimerY = entry.recommendations ? 220 : 140;
+    doc.setFontSize(10);
+    doc.text('IMPORTANTE: Este diagnóstico é baseado em análise de imagem por IA.', 20, disclaimerY);
+    doc.text('Consulte um técnico agrícola para confirmação e tratamento adequado.', 20, disclaimerY + 10);
+    
+    // Rodapé
+    doc.setFontSize(8);
+    doc.text('© 2025 agro.IA - Tecnologia a serviço da agricultura', 20, 280);
+    
+    // Salvar o PDF
+    doc.save(`laudo-${entry.plantName}-${entry.id}.pdf`);
   };
 
   return (

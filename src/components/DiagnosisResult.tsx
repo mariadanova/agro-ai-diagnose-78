@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import jsPDF from 'jspdf';
 
 interface DiagnosisData {
   plantName: string;
@@ -34,14 +35,53 @@ const DiagnosisResult: React.FC<DiagnosisResultProps> = ({ diagnosis, onNewDiagn
   };
 
   const generatePDF = () => {
-    // Simular geração de PDF
-    const blob = new Blob(['Laudo Técnico - agro.IA'], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `laudo-${diagnosis.plantName}-${Date.now()}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const doc = new jsPDF();
+    const currentDate = new Date().toLocaleDateString('pt-BR');
+    
+    // Cabeçalho
+    doc.setFontSize(20);
+    doc.text('LAUDO TÉCNICO - agro.IA', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Data: ${currentDate}`, 20, 35);
+    
+    // Linha separadora
+    doc.line(20, 40, 190, 40);
+    
+    // Informações da planta
+    doc.setFontSize(16);
+    doc.text('INFORMAÇÕES DA ANÁLISE', 20, 55);
+    
+    doc.setFontSize(12);
+    doc.text(`Cultura: ${diagnosis.plantName}`, 20, 70);
+    doc.text(`Doença Identificada: ${diagnosis.disease}`, 20, 85);
+    doc.text(`Severidade: ${getSeverityLabel(diagnosis.severity)} (${diagnosis.severity}%)`, 20, 100);
+    doc.text(`Confiança do Diagnóstico: ${diagnosis.confidence}%`, 20, 115);
+    
+    // Recomendações
+    doc.setFontSize(16);
+    doc.text('RECOMENDAÇÕES DE MANEJO', 20, 140);
+    
+    doc.setFontSize(12);
+    let yPosition = 155;
+    diagnosis.recommendations.forEach((rec, index) => {
+      const lines = doc.splitTextToSize(`${index + 1}. ${rec}`, 170);
+      doc.text(lines, 20, yPosition);
+      yPosition += lines.length * 7;
+    });
+    
+    // Disclaimer
+    yPosition += 10;
+    doc.setFontSize(10);
+    doc.text('IMPORTANTE: Este diagnóstico é baseado em análise de imagem por IA.', 20, yPosition);
+    doc.text('Consulte um técnico agrícola para confirmação e tratamento adequado.', 20, yPosition + 10);
+    
+    // Rodapé
+    doc.setFontSize(8);
+    doc.text('© 2025 agro.IA - Tecnologia a serviço da agricultura', 20, 280);
+    
+    // Salvar o PDF
+    doc.save(`laudo-${diagnosis.plantName}-${Date.now()}.pdf`);
   };
 
   // Salvar no localStorage para histórico
