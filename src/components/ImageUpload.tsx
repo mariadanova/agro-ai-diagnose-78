@@ -9,7 +9,8 @@ interface ImageUploadProps {
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleFile = (file: File) => {
@@ -73,7 +74,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
             ou clique no botão abaixo para selecionar
           </p>
           <Button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => galleryInputRef.current?.click()}
             className="bg-green-500 hover:bg-green-600"
           >
             <Upload className="mr-2 h-4 w-4" />
@@ -88,7 +89,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
           variant="outline"
           size="lg"
           className="w-full border-green-500 text-green-600 hover:bg-green-50"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => cameraInputRef.current?.click()}
         >
           <Camera className="mr-2 h-5 w-5" />
           Usar Câmera
@@ -107,7 +108,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
       </div>
 
       <input
-        ref={fileInputRef}
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileInput}
+        className="hidden"
+      />
+      <input
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         onChange={handleFileInput}
