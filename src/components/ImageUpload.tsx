@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
 interface ImageUploadProps {
-  onImageSelected: (imageUrl: string, location?: GeolocationPosition) => void;
+  onImageSelected: (imageUrl: string) => void;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
@@ -18,25 +18,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
-          // Capturar localização GPS
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                onImageSelected(e.target.result as string, position);
-              },
-              (error) => {
-                console.warn('Erro ao obter localização:', error);
-                onImageSelected(e.target.result as string);
-              },
-              {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-              }
-            );
-          } else {
-            onImageSelected(e.target.result as string);
-          }
+          onImageSelected(e.target.result as string);
         }
       };
       reader.readAsDataURL(file);
