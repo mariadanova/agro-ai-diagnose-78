@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import jsPDF from 'jspdf';
+import LocationMap from './LocationMap';
 
 interface DiagnosisData {
   plantName: string;
@@ -210,6 +211,21 @@ const DiagnosisResult: React.FC<DiagnosisResultProps> = ({ diagnosis, onNewDiagn
           </div>
         </CardContent>
       </Card>
+
+      {/* Location Map */}
+      {diagnosis.location && (
+        <Card className="shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <MapPin className="h-5 w-5 text-blue-500" />
+              <span>Localização da Captura</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LocationMap location={diagnosis.location} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Actions */}
       <Card className="shadow-lg border-green-200">
