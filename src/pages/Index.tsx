@@ -13,9 +13,11 @@ const Index = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCrop, setSelectedCrop] = useState<string>('');
   const [diagnosisData, setDiagnosisData] = useState(null);
+  const [imageLocation, setImageLocation] = useState<GeolocationPosition | null>(null);
 
-  const handleImageSelected = (imageUrl: string) => {
+  const handleImageSelected = (imageUrl: string, location?: GeolocationPosition) => {
     setSelectedImage(imageUrl);
+    setImageLocation(location || null);
     setCurrentStep('selecting');
   };
 
@@ -28,7 +30,8 @@ const Index = () => {
         severity: Math.floor(Math.random() * 100),
         confidence: 85 + Math.floor(Math.random() * 15),
         recommendations: getRecommendations(selectedCrop),
-        image: selectedImage
+        image: selectedImage,
+        location: imageLocation
       };
       setDiagnosisData(mockDiagnosis);
       setCurrentStep('diagnosis');
@@ -73,6 +76,7 @@ const Index = () => {
     setSelectedImage(null);
     setSelectedCrop('');
     setDiagnosisData(null);
+    setImageLocation(null);
   };
 
   return (

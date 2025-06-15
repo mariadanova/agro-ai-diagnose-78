@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { FileText, Download, AlertTriangle, CheckCircle, RefreshCw } from 'lucide-react';
+import { FileText, Download, AlertTriangle, CheckCircle, RefreshCw, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,7 @@ interface DiagnosisData {
   confidence: number;
   recommendations: string[];
   image: string;
+  location?: GeolocationPosition | null;
 }
 
 interface DiagnosisResultProps {
@@ -58,12 +59,18 @@ const DiagnosisResult: React.FC<DiagnosisResultProps> = ({ diagnosis, onNewDiagn
     doc.text(`Severidade: ${getSeverityLabel(diagnosis.severity)} (${diagnosis.severity}%)`, 20, 100);
     doc.text(`Confiança do Diagnóstico: ${diagnosis.confidence}%`, 20, 115);
     
+    // Localização se disponível
+    if (diagnosis.location) {
+      doc.text(`Localização: ${diagnosis.location.coords.latitude.toFixed(6)}, ${diagnosis.location.coords.longitude.toFixed(6)}`, 20, 130);
+    }
+    
     // Recomendações
     doc.setFontSize(16);
-    doc.text('RECOMENDAÇÕES DE MANEJO', 20, 140);
+    const recStartY = diagnosis.location ? 150 : 140;
+    doc.text('RECOMENDAÇÕES DE MANEJO', 20, recStartY);
     
     doc.setFontSize(12);
-    let yPosition = 155;
+    let yPosition = diagnosis.location ? 165 : 155;
     diagnosis.recommendations.forEach((rec, index) => {
       const lines = doc.splitTextToSize(`${index + 1}. ${rec}`, 170);
       doc.text(lines, 20, yPosition);
@@ -131,6 +138,20 @@ const DiagnosisResult: React.FC<DiagnosisResultProps> = ({ diagnosis, onNewDiagn
               </div>
               <Progress value={diagnosis.confidence} className="h-2" />
             </div>
+            
+            {diagnosis.location && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center space-x-2 mb-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium text-blue-900">Localização da Captura</span>
+                </div>
+                <div className="text-sm text-blue-800">
+                  <p>Lat: {diagnosis.location.coords.latitude.toFixed(6)}</p>
+                  <p>Long: {diagnosis.location.coords.longitude.toFixed(6)}</p>
+                  <p>Precisão: {diagnosis.location.coords.accuracy.toFixed(0)}m</p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
