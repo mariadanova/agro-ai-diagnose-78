@@ -1,16 +1,15 @@
 
 import React, { useState } from 'react';
-import { Camera, Upload, FileText, History, Leaf, Cloud } from 'lucide-react';
+import { Camera, Upload, FileText, History, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImageUpload from '@/components/ImageUpload';
 import CropSelector from '@/components/CropSelector';
 import DiagnosisResult from '@/components/DiagnosisResult';
 import DiagnosisHistory from '@/components/DiagnosisHistory';
-import WeatherIrrigation from './WeatherIrrigation';
 
 const Index = () => {
-  const [currentStep, setCurrentStep] = useState('upload'); // upload, selecting, diagnosis, history, weather
+  const [currentStep, setCurrentStep] = useState('upload'); // upload, selecting, diagnosis, history
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedCrop, setSelectedCrop] = useState<string>('');
   const [diagnosisData, setDiagnosisData] = useState(null);
@@ -94,14 +93,6 @@ const Index = () => {
             <div className="flex items-center space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setCurrentStep('weather')}
-                className="flex items-center space-x-2"
-              >
-                <Cloud className="h-4 w-4" />
-                <span>Clima</span>
-              </Button>
-              <Button
-                variant="outline"
                 onClick={() => setCurrentStep('history')}
                 className="flex items-center space-x-2"
               >
@@ -152,12 +143,6 @@ const Index = () => {
         {currentStep === 'history' && (
           <div className="max-w-6xl mx-auto">
             <DiagnosisHistory onBack={() => setCurrentStep('upload')} />
-          </div>
-        )}
-
-        {currentStep === 'weather' && (
-          <div className="max-w-6xl mx-auto">
-            <WeatherIrrigation onBack={() => setCurrentStep('upload')} />
           </div>
         )}
       </main>
